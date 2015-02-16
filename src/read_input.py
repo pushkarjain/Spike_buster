@@ -1,6 +1,6 @@
 from osgeo import gdal
 def read_input(infile):
-    """Read input file"""
+    """Read input file. Exit status if unable to find/open the file."""
     gdal.UseExceptions()
     try:
         ds = gdal.Open(infile)
