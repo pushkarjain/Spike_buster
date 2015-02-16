@@ -1,3 +1,16 @@
+"""
+Spike-buster : Despiking reflectivity data
+
+Usage:
+    pymain.py IN_FILE
+
+Arguments:
+    IN_FILE    :       Input GeoTIFF file path
+
+Options:
+    -h         :       Show help
+"""
+from docopt import docopt
 from osgeo import gdal
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,9 +25,9 @@ from scaledown import scale_down
 from scaleup import scale_up
 from write_output import write_output
 
-def main():
+def main(arguments):
     #Read input GeoTIFF file
-    in_data = GeoRead("../input/UNQC_CREF.20120708.105500.tif")
+    in_data = GeoRead(arguments['IN_FILE'])
 
     #--------------------------------------------------------------#
     # Alogirtihm
@@ -66,4 +79,7 @@ def main():
     print "Script completed successfully."
 
 if __name__ == '__main__':
-    main()
+    arguments = docopt(__doc__, version = '1.0.0')
+    print arguments
+
+    main(arguments)
