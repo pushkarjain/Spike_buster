@@ -1,0 +1,694 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass scrartcl
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Reflectivity data Spike-buster
+\end_layout
+
+\begin_layout Author
+Pushkar Kumar Jain
+\end_layout
+
+\begin_layout Date
+February 18 2015
+\end_layout
+
+\begin_layout Abstract
+The document deals with the removal of sunspikes from reflectivity data
+ mosaiced from the NEXRAD radar network using an automated Python script.
+ The objective is to develop a proof-of-concept to remove the sunspikes,
+ with the rest of the data intact.
+ The document deals with a brief description of the capability of the Python
+ script and the algorithm followed to achieve the result.
+ The input data is in GeoTIFF format and a suitable library has been used
+ to extract the appropriate data for analyses.
+ The Python script is supported by multiple libraries.
+ 
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+As given in Ref 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "key-1"
+
+\end_inset
+
+, in addition to precipitating particles, echoes on radar may be due to
+ biological targets such as insects, birds or wind-borne particles, due
+ to anomalous propagation (AP) or ground clutter (GC) or due to test and
+ interference patterns that inadvertently seep into the final products.
+ However, it is possible to identify, and account for, the presence of such
+ contamination via automated weather radar algorithms.
+ Neural networks have been used widely for such applications (Ref 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "key-2"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+This document (as given in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Algorithm"
+
+\end_inset
+
+) presents an algorithm that was followed to achieve the despiking of the
+ reflectivity data.
+ Python script has been developed for pre-processing, execution and post-process
+ing of data.
+ The image processing technique, using filters and 'erosion' has been used.
+ Since, the knowledge in the field is relatively low, effort has been put
+ to adopt the literature into automated script.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Code-structure"
+
+\end_inset
+
+ describes the code structure and will further state the dependencies in
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:External-libraries"
+
+\end_inset
+
+.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Code-execution"
+
+\end_inset
+
+ explains the code exectuion followed by results in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Results"
+
+\end_inset
+
+.
+ Various conclusions are drawn with some ideas that can be implemented in
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Conclusion"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Algorithm
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Algorithm"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+WIth minimum prior knowledge in the area of image processing, literature
+ in the field was implemented with basic knowledge from various blogs.
+ The technique can be broken down into following steps - 
+\end_layout
+
+\begin_layout Enumerate
+Read GeoTIFF image
+\end_layout
+
+\begin_layout Enumerate
+Find the maxima and the minima value in the array
+\end_layout
+
+\begin_layout Enumerate
+Normalize the data to [-1, 1] by using a linear scaling function.
+\end_layout
+
+\begin_layout Enumerate
+Use percentile mean filter to only use values between percentiles 
+\begin_inset Formula $p0$
+\end_inset
+
+ and 
+\begin_inset Formula $p1$
+\end_inset
+
+ (here 10% and 90%).
+ The filter smooths the image background and details so that next process
+ can be specifically implemented on the area of interest, that is, the reflectiv
+ity data regions.
+\end_layout
+
+\begin_layout Enumerate
+Use morphological erosion approrpirately.to set a pixel 
+\begin_inset Formula $(i,j)$
+\end_inset
+
+ to the minimum over all the pixels in the neighborhood centered at 
+\begin_inset Formula $(i,j)$
+\end_inset
+
+.
+ The structuring element, 
+\begin_inset Formula $selem$
+\end_inset
+
+, passed to erosion is a boolean array that describes this neighborhood
+ and thus decides the disk radius.
+\end_layout
+
+\begin_layout Enumerate
+Normalize the data back to minima and maxima of the original image, by using
+ linear scaling function.
+\end_layout
+
+\begin_layout Enumerate
+Compare the original and the final image
+\end_layout
+
+\begin_layout Standard
+This method was chosen as it helped to 'farm' the processes to existing
+ modules in scimage ibrary, thereby reaching the goal in the shortest time
+ possible.
+ This obviated the need to handle the data sets manually and implement some
+ specific algorithm like neural networks etc.
+ However, it is to be noted that, the latter is a better approach as it
+ provides flexibility and broader area for new algorithm development.
+\end_layout
+
+\begin_layout Section
+Code structure
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Code-structure"
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+The Python code has been packaged, The root directory of the script contains
+ - 
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+doc - 
+\shape default
+Contains the documentation
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+src - 
+\shape default
+Contains the source code with the main file
+\shape italic
+ pymain.py.
+ 
+\shape default
+It also contains the plotting tools.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+input - 
+\shape default
+Contains the input GeoTIFF file
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+output - 
+\shape default
+The python execution generates output and plot that is stored in this directoty
+\end_layout
+
+\begin_deeper
+\begin_layout Subsection
+External libraries
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:External-libraries"
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The code employs multiple externaml libraries.
+ These are listed as -
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+numpy
+\series default
+ - To implement array operations
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+scimage
+\series default
+ - Image processing toolbox with various functionalities including application
+ of filters (
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://scikit-image.org/
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+docopt
+\series default
+ - Command line argument parser (
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://docopt.org/
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+matplotlib
+\series default
+ - Plotting tool for Python
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+GDAL
+\series default
+ - Geoprocessing data library to read in GeoTIFFF file.
+ (
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.gdal.org/
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Subsection
+Code execution
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Code-execution"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\shape italic
+README.rst 
+\shape default
+states the way to run the Python script.
+ In the source directory, execute
+\end_layout
+
+\begin_layout LyX-Code
+$ python pymain.py IN_FILE
+\end_layout
+
+\begin_layout Standard
+, where IN_FILE is the path to input TIFFF file.
+ Running status of the script is provided, in addition to robustness in
+ form of system exit in case of any run time error.
+\end_layout
+
+\begin_layout Standard
+Four values have been hard-coded into the script - 
+\begin_inset Formula $ScreenOut$
+\end_inset
+
+,
+\begin_inset Formula $selem$
+\end_inset
+
+, 
+\begin_inset Formula $po$
+\end_inset
+
+ and 
+\begin_inset Formula $p1$
+\end_inset
+
+(discussed in algorithm in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Algorithm"
+
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ScreenOut$
+\end_inset
+
+ is by default switched off.
+ Different values of 
+\begin_inset Formula $selem$
+\end_inset
+
+ ranging from 
+\begin_inset Formula $10$
+\end_inset
+
+ to 
+\begin_inset Formula $25$
+\end_inset
+
+ were tried inorder to achieve the best result.
+ It is to be noted that, the conclusion of reaching the 'best' result was
+ solely visual aided.
+ No particular algorithm was developed to check the deviation of the result
+ with teh original image.
+ This is open in future.
+ Some technique might be to find the 
+\begin_inset Formula $L^{p}$
+\end_inset
+
+ norm of the dataset.
+ Similarly, 
+\begin_inset Formula $p0=0.1$
+\end_inset
+
+ and 
+\begin_inset Formula $p1=0.9$
+\end_inset
+
+ values were taken as they were the default values in the function call.
+ 
+\end_layout
+
+\begin_layout Standard
+One possible technique to obtain the best result is to choose a suitable
+ combination of these three values.
+\end_layout
+
+\begin_layout Standard
+HTML pages via Sphinx documentation can be generated by executing the following
+ command in 
+\shape italic
+doc
+\shape default
+ directory.
+ The HTML page can be accessed in 
+\shape italic
+doc/_build/index.html
+\shape default
+.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+$ make html
+\end_layout
+
+\begin_layout Section
+Results
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Results"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On executing the code, the reult given in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Comparison-of-the"
+
+\end_inset
+
+ is obtained.
+ The regions of interest, that is, the reflectivity data was extracted from
+ the base image.
+ This was followed by the removal of the spikes via erosion.
+ As stated earlier, the deviation can be quanitifed using appropriate error
+ norms.
+ 
+\end_layout
+
+\begin_layout Standard
+Currently, the output is stored as 
+\begin_inset Formula $a.png$
+\end_inset
+
+.
+ Writing output to TIFFF format was ventured but unsucessful.
+ This can be implemented with further availibility of time.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /Users/pkjain/Desktop/Climate_corp/output/No_spikes_scaled.png
+	scale 80
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Comparison of the original image with the final image obtained by implementing
+ the stated algorithm
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Comparison-of-the"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusion
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Conclusion"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+An automated Python script has been developed to perform the despiking of
+ the reflectivity data.
+ Proof of concept approach was used to implement the algoithm via image
+ processing.
+ The result clearly shows the spikes have significantly reduced, but with
+ a compromise on the reflectivity values in other areas.
+ There is a need to quantify this deviation so that the best combination
+ of 
+\begin_inset Formula $selem$
+\end_inset
+
+, 
+\begin_inset Formula $p0$
+\end_inset
+
+ and 
+\begin_inset Formula $p1$
+\end_inset
+
+ can be chosen.
+ There is a large scope for improvement.
+ Various algorithms from literature can be implemented that handle the array
+ data manually, rather than applying filters.
+ This will provide more flexibility in the form of customization and calibration.
+\end_layout
+
+\begin_layout Standard
+The current code execution takes significant time in the erosion process.
+ This can be reduced by decreasing the dimension of the the input array.
+ One possible technique is to compress the image using single value decompositio
+n technique to remove the 'non-essential' pixels.
+ 
+\end_layout
+
+\begin_layout Standard
+The Python package is structured with documentation.
+ Further, various libraries have been used to make the task easier.
+ The plotting utilities can be upgraded to accomodate additional filters.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "key-1"
+
+\end_inset
+
+ Mazur, Rebecca J., V.
+ Lakshmanan, and Gregory J.
+ Stumpf.
+ "Quality control of radar data to improve mesocyclone detection." Preprints,
+ 20th Int’l Conf.
+ on Inter.
+ Inf.
+ Proc.
+ Sys.(IIPS) for Meteor., Ocean., and Hydr.,(Seattle) P.
+ Vol.
+ 1.
+ 2004.
+ APA 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "key-2"
+
+\end_inset
+
+Lakshmanan, Valliappa, et al.
+ "An automated technique to quality control radar reflectivity data." Journal
+ of applied meteorology and climatology 46.3 (2007): 288-305.
+ APA 
+\end_layout
+
+\end_body
+\end_document

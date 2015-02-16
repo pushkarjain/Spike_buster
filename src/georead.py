@@ -2,6 +2,7 @@ from osgeo import gdal
 from read_input import read_input
 
 class GeoRead(object):
+    """ Class to set the geospatial attributes"""
     def __init__(self, myfile):
         self.myfile = myfile
         self.ds = read_input(myfile)

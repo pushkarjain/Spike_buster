@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
 def plot_comparison(original, filtered, filter_name):
+    """ Compare the *original* and *filtered* image using the title *filter_name*"""
     fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
     ax1.imshow(original)
     ax1.set_title('Baseline image')
