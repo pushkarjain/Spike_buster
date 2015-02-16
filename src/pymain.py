@@ -16,8 +16,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.filter import rank
 from skimage.morphology import erosion, disk
-from georead import GeoRead
 
+from georead import GeoRead
 from pyplot.plot_comparison import plot_comparison
 from pyplot.plot_output import plot_output
 from read_input import read_input

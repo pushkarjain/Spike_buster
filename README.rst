@@ -1,9 +1,10 @@
 README
 ======
 
-In the **src** directory, execute::
-    $ python pymain.py -h
-    
+In the *src* directory, execute the main file **pymain.py**::
+
+      $ python pymain.py -h
+      
       Spike-buster : Despiking reflectivity data
 
       Usage:
@@ -14,3 +15,8 @@ In the **src** directory, execute::
 
       Options:
           -h         :       Show help
+
+
+In the *src* directory, try this::
+
+      $ python pymain.py ../input/input.tif
